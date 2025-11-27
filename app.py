@@ -8,18 +8,26 @@ from PIL import Image
 
 app = Flask(__name__)
 
-# ===== Model load =====
+# ===== Model load (lazy loading to avoid startup timeout) =====
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "Final_Model.h5")
-try:
-    model = tf.keras.models.load_model(MODEL_PATH)
-    print(f"Model loaded successfully from {MODEL_PATH}")
-except Exception as e:
-    print(f"Error loading model: {e}")
-    print("Please ensure Final_Model.h5 is in the same directory as app.py")
-    model = None
+model = None
 
 # Image size used during training
 IMG_SIZE = 128
+
+def load_model():
+    """Lazy load model only when needed"""
+    global model
+    if model is None:
+        try:
+            print(f"Loading model from {MODEL_PATH}...")
+            model = tf.keras.models.load_model(MODEL_PATH)
+            print(f"Model loaded successfully from {MODEL_PATH}")
+        except Exception as e:
+            print(f"Error loading model: {e}")
+            print("Please ensure Final_Model.h5 is in the same directory as app.py")
+            model = None
+    return model
 
 
 @app.route("/")
@@ -29,7 +37,9 @@ def home():
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    if model is None:
+    # Lazy load model on first prediction
+    model_instance = load_model()
+    if model_instance is None:
         return render_template("index.html", prediction="Model not loaded. Please ensure Final_Model.h5 is available.")
     
     if "file" not in request.files:
@@ -52,7 +62,7 @@ def predict():
     print("DEBUG img_array.shape:", img_array.shape)
 
     # ----- MULTI-CLASS PREDICTION -----
-    preds = model.predict(img_array)
+    preds = model_instance.predict(img_array)
     class_index = np.argmax(preds[0])
     confidence = round(np.max(preds[0]) * 100, 2)
 
