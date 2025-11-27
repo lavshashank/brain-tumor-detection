@@ -1,7 +1,5 @@
 from flask import Flask, request, render_template
 import numpy as np
-import tensorflow as tf
-from tensorflow.keras.preprocessing import image
 import os
 import io
 from PIL import Image
@@ -11,15 +9,22 @@ app = Flask(__name__)
 # ===== Model load (lazy loading to avoid startup timeout) =====
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "Final_Model.h5")
 model = None
+tf = None  # Lazy import TensorFlow
 
 # Image size used during training
 IMG_SIZE = 128
 
 def load_model():
-    """Lazy load model only when needed"""
-    global model
+    """Lazy load model only when needed - imports TensorFlow on first call"""
+    global model, tf
     if model is None:
         try:
+            # Lazy import TensorFlow only when needed
+            if tf is None:
+                print("Importing TensorFlow...")
+                import tensorflow as tf
+                print("TensorFlow imported successfully")
+            
             print(f"Loading model from {MODEL_PATH}...")
             model = tf.keras.models.load_model(MODEL_PATH)
             print(f"Model loaded successfully from {MODEL_PATH}")
@@ -28,6 +33,14 @@ def load_model():
             print("Please ensure Final_Model.h5 is in the same directory as app.py")
             model = None
     return model
+
+def get_tf_image():
+    """Lazy import tensorflow.keras.preprocessing.image"""
+    global tf
+    if tf is None:
+        import tensorflow as tf
+    from tensorflow.keras.preprocessing import image
+    return image
 
 
 @app.route("/")
@@ -54,8 +67,9 @@ def predict():
     img = Image.open(io.BytesIO(file.read()))
     img = img.resize((IMG_SIZE, IMG_SIZE))  # 128 x 128
 
-    # Convert to array
-    img_array = image.img_to_array(img)
+    # Convert to array (lazy import)
+    image_module = get_tf_image()
+    img_array = image_module.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0)
     img_array = img_array / 255.0
 
