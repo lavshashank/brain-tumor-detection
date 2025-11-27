@@ -2,8 +2,7 @@ services:
   - type: web
     name: brain-tumor-detection
     env: python
-    rootDir: Brain_Tumor_Detection
-    buildCommand: pip install -r requirements.txt
+    buildCommand: cd Brain_Tumor_Detection && pip install -r requirements.txt
     startCommand: cd Brain_Tumor_Detection && gunicorn app:app
     envVars:
       - key: PORT
