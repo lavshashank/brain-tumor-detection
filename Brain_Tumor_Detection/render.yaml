@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: brain-tumor-detection
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PORT
+        value: 5000
+    plan: starter
+
