@@ -18,5 +18,8 @@ COPY . .
 EXPOSE 5000
 
 # Run with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--threads", "2", "app:app"]
+# Using --preload to load app once and fork workers (saves memory)
+# Single worker with sync class to avoid memory issues with TensorFlow
+# Extended timeout to handle TensorFlow initialization
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--worker-class", "sync", "--timeout", "300", "--graceful-timeout", "300", "--preload", "app:app"]
 
