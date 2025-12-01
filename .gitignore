@@ -11,7 +11,9 @@ __pycache__/
 dist/
 build/
 .DS_Store
-*.h5
+# Allow Final_Model.h5 to be tracked
+# *.h5
 *.hdf5
+!Final_Model.h5
 .env
 .venv
