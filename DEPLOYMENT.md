@@ -1,7 +1,31 @@
 # Deployment Guide
 
 ## Important: Model File Required
-Before deploying, ensure `Final_Model.h5` is in the `Brain_Tumor_Detection` directory.
+Before deploying, ensure `Final_Model.h5` is in the same directory as `app.py`.
+
+### Adding the Model File to Your Repository
+
+The model file (`*.h5`) is currently in `.gitignore`. To include it in your repository:
+
+**Option 1: Force add the file (Recommended)**
+```bash
+git add -f Final_Model.h5
+git commit -m "Add model file"
+git push
+```
+
+**Option 2: Remove .h5 from .gitignore**
+1. Edit `.gitignore` and remove or comment out the `*.h5` line
+2. Then add the file normally:
+```bash
+git add Final_Model.h5
+git commit -m "Add model file"
+git push
+```
+
+**Option 3: For Docker deployments**
+- Ensure `Final_Model.h5` is in the directory when you run `docker build`
+- The file will be copied into the image during the build process
 
 ## Deployment Options
 

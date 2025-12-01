@@ -19,6 +19,15 @@ def load_model():
     global model, tf
     if model is None:
         try:
+            # Check if model file exists first
+            if not os.path.exists(MODEL_PATH):
+                print(f"ERROR: Model file not found at {MODEL_PATH}")
+                print(f"Current working directory: {os.getcwd()}")
+                print(f"App file directory: {os.path.dirname(__file__)}")
+                print(f"Files in directory: {os.listdir(os.path.dirname(__file__))}")
+                model = None
+                return None
+            
             # Lazy import TensorFlow only when needed
             if tf is None:
                 print("Importing TensorFlow...")
@@ -28,8 +37,14 @@ def load_model():
             print(f"Loading model from {MODEL_PATH}...")
             model = tf.keras.models.load_model(MODEL_PATH)
             print(f"Model loaded successfully from {MODEL_PATH}")
+        except FileNotFoundError as e:
+            print(f"ERROR: Model file not found: {e}")
+            print(f"Expected path: {MODEL_PATH}")
+            print(f"Current directory: {os.getcwd()}")
+            model = None
         except Exception as e:
             print(f"Error loading model: {e}")
+            print(f"Model path attempted: {MODEL_PATH}")
             print("Please ensure Final_Model.h5 is in the same directory as app.py")
             model = None
     return model
@@ -53,7 +68,12 @@ def predict():
     # Lazy load model on first prediction
     model_instance = load_model()
     if model_instance is None:
-        return render_template("index.html", prediction="Model not loaded. Please ensure Final_Model.h5 is available.")
+        error_msg = (
+            "Model file (Final_Model.h5) not found. "
+            "Please ensure the model file is in the same directory as app.py. "
+            "Check server logs for detailed error information."
+        )
+        return render_template("index.html", prediction=error_msg, error=True)
     
     if "file" not in request.files:
         return render_template("index.html", prediction="Please upload an MRI image.")

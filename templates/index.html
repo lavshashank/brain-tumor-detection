@@ -333,6 +333,18 @@
 
             {% if prediction %}
             <div class="result-card">
+                {% if error %}
+                <!-- Error message display -->
+                <div class="result-label" style="color: #ef4444;">Error</div>
+                <div class="result-value" style="color: #ef4444; background: #fee2e2; border-color: #fca5a5;">
+                    {{ prediction }}
+                </div>
+                <p class="disclaimer" style="margin-top: 1rem; color: #dc2626;">
+                    <strong>Note:</strong> The model file (Final_Model.h5) must be present in the application directory. 
+                    If deploying, ensure the model file is included in your deployment package.
+                </p>
+                {% else %}
+                <!-- Normal prediction display -->
                 <div class="result-label">Overall Prediction</div>
                 <div class="result-value {{ 'tumor' if prediction != 'No Tumor' else 'notumor' }}">
                     {% if prediction == 'No Tumor' %}
@@ -371,6 +383,7 @@
                     This tool is intended for academic and demonstration purposes only.
                     It does not replace professional medical imaging analysis or diagnosis.
                 </p>
+                {% endif %}
             </div>
             {% else %}
             <div class="result-card">
